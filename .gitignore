@@ -1,0 +1,15 @@
+# package directories
+node_modules
+jspm_packages
+
+# Serverless directories
+.serverless
+
+# env
+.env
+
+# package logs
+package-lock.json
+
+# text
+tree.text

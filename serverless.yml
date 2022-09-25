@@ -1,0 +1,120 @@
+service: aws-lambda
+
+frameworkVersion: "3"
+
+plugins:
+  - serverless-dotenv-plugin
+
+deprecationNotificationMode: error
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: ${env:APP_AWS_REGION}
+
+  # you can add statements to the Lambda function's IAM Role here
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "*"
+        - Effect: "Allow"
+          Action:
+            - "s3:ListObjects"
+            - "s3:GetObject"
+            - "s3:PutObject"
+          Resource:
+            - "arn:aws:s3:::${env:APP_AWS_BUCKET_S3_IMAGE}"
+            - "arn:aws:s3:::${env:APP_AWS_BUCKET_S3_IMAGE}/*"
+        - Effect: "Allow"
+          Action:
+            - "cognito-idp:AdminInitiateAuth"
+            - "cognito-idp:AdminCreateUser"
+            - "cognito-idp:AdminSetUserPassword"
+          Resource: "*"
+
+# you can add packaging information here
+#package:
+#  patterns:
+#    - '!exclude-me.js'
+#    - '!exclude-me-dir/**'
+#    - include-me.js
+#    - include-me-dir/**
+
+functions:
+  loginUser:
+    handler: main.loginUser
+    memorySize: 128
+    description: Handle login user using cognito
+    events:
+      - http:
+          path: users/login
+          method: post
+          cors: true
+  registerUser:
+    handler: main.registerUser
+    memorySize: 128
+    description: Handle register user using cognito
+    events:
+      - http:
+          path: users/register
+          method: post
+          cors: true
+  api:
+    handler: main.restApi
+    memorySize: 128
+    description: Handle rest api
+    events:
+      - httpApi: "*"
+
+# you can add CloudFormation resource templates here
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        TableName: ${env:APP_DYNAMODB_USER_TABLE}
+    # Cognito
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${env:APP_AWS_USER_POOL_NAME}-${env:APP_AWS_STAGE}
+        Schema:
+          - Name: email
+            Required: true
+            Mutable: true
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+        AutoVerifiedAttributes:
+          - email
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${env:APP_AWS_USER_POOL_CLIENT_NAME}-${env:APP_AWS_STAGE}
+        UserPoolId:
+          Ref: CognitoUserPool
+        GenerateSecret: false
+        ExplicitAuthFlows:
+          - "ALLOW_USER_SRP_AUTH"
+          - "ALLOW_REFRESH_TOKEN_AUTH"
