@@ -3,9 +3,9 @@ service: aws-lambda
 frameworkVersion: "3"
 
 plugins:
+  - serverless-appsync-plugin
   - serverless-dotenv-plugin
-
-deprecationNotificationMode: error
+  - serverless-webpack
 
 useDotenv: true
 
@@ -13,33 +13,40 @@ provider:
   name: aws
   runtime: nodejs14.x
   region: ${env:APP_AWS_REGION}
-
+  httpApi:
+    cors: true
+    authorizers:
+      serviceAuthorizer:
+        identitySource: $request.header.Authorization
+        issuerUrl:
+          Fn::Join:
+            - ""
+            - - "https://cognito-idp."
+              - "${opt:region, self:provider.region}"
+              - ".amazonaws.com/"
+              - Ref: CognitoUserPool
+        audience:
+          - Ref: CognitoUserPoolClient
+  environment:
+    APP_AWS_USER_POOL_ID: { Ref: CognitoUserPool }
+    APP_AWS_USER_POOL_CLIENT_ID: { Ref: CognitoUserPoolClient }
   # you can add statements to the Lambda function's IAM Role here
   iam:
     role:
       statements:
         - Effect: "Allow"
           Action:
-            - dynamodb:Query
-            - dynamodb:Scan
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
+            - "dynamodb:*"
           Resource: "*"
         - Effect: "Allow"
           Action:
-            - "s3:ListObjects"
             - "s3:GetObject"
             - "s3:PutObject"
           Resource:
-            - "arn:aws:s3:::${env:APP_AWS_BUCKET_S3_IMAGE}"
-            - "arn:aws:s3:::${env:APP_AWS_BUCKET_S3_IMAGE}/*"
+            - "arn:aws:s3:::${env:APP_AWS_BUCKET_S3_UPLOAD}-${env:APP_AWS_REGION}"
         - Effect: "Allow"
           Action:
-            - "cognito-idp:AdminInitiateAuth"
-            - "cognito-idp:AdminCreateUser"
-            - "cognito-idp:AdminSetUserPassword"
+            - "cognito-idp:*"
           Resource: "*"
 
 # you can add packaging information here
@@ -50,50 +57,129 @@ provider:
 #    - include-me.js
 #    - include-me-dir/**
 
+custom:
+  webpack:
+    webpackConfig: webpack.config.js
+    includeModules: true
+    concurrency: 5
+  appSync:
+    name: appsync-api
+    authenticationType: AMAZON_COGNITO_USER_POOLS
+    userPoolConfig:
+      awsRegion: ${env:APP_AWS_REGION}
+      defaultAction: ALLOW
+      userPoolId: { Ref: CognitoUserPool }
+      region: ${env:APP_AWS_REGION}
+    schema:
+      - graphql/schema.graphql
+    mappingTemplates: ${file(./mapping-templates/resources/appsync-mapping-templates.yml)}
+    dataSources:
+      - type: AWS_LAMBDA
+        name: createTodo
+        description: "Create todo lambda resource"
+        config:
+          functionName: createTodo
+      - type: AWS_LAMBDA
+        name: getTodos
+        description: "Get all todo lambda resource"
+        config:
+          functionName: getTodos
+      - type: AWS_LAMBDA
+        name: getTodo
+        description: "Get one todo lambda resource"
+        config:
+          functionName: getTodo
+      - type: AWS_LAMBDA
+        name: updateTodo
+        description: "Update todo lambda resource"
+        config:
+          functionName: updateTodo
+      - type: AWS_LAMBDA
+        name: deleteTodo
+        description: "Delete todo lambda resource"
+        config:
+          functionName: deleteTodo
+
 functions:
+  registerUser:
+    handler: main.registerUser
+    description: Handle register user using cognito
+    timeout: 10
+    events:
+      - http:
+          path: auth/register
+          method: POST
+          cors: true
   loginUser:
     handler: main.loginUser
-    memorySize: 128
     description: Handle login user using cognito
     events:
       - http:
-          path: users/login
-          method: post
+          path: auth/login
+          method: POST
           cors: true
-  registerUser:
-    handler: main.registerUser
-    memorySize: 128
-    description: Handle register user using cognito
+  uploadImage:
+    handler: main.uploadImage
+    description: Handle upload image
     events:
       - http:
-          path: users/register
-          method: post
+          path: upload/images
+          method: POST
           cors: true
-  api:
-    handler: main.restApi
-    memorySize: 128
+  getImage:
+    handler: main.getImage
+    description: Handle get image
+    events:
+      - http:
+          path: upload/images/{fileID}
+          method: GET
+          cors: true
+  deleteImage:
+    handler: main.deleteImage
+    description: Handle delete image
+    events:
+      - http:
+          path: delete/images/{fileID}
+          method: DELETE
+          cors: true
+  resizeImage:
+    handler: main.resizeImage
+    description: Handle resize image
+    events:
+      - s3:
+          bucket: ${env:APP_AWS_BUCKET_S3_UPLOAD}-${env:APP_AWS_REGION}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploads/
+            - suffix: .jpg
+          existing: true
+  createTodo:
+    handler: main.createTodo
+    description: Handle create todo
+  getTodos:
+    handler: main.getTodos
+    description: Handle get all todo
+  getTodo:
+    handler: main.getTodo
+    description: Handle get one todo
+  updateTodo:
+    handler: main.updateTodo
+    description: Handle update todo
+  deleteTodo:
+    handler: main.deleteTodo
+    description: Handle delete todo
+  restApi:
+    handler: main.server
     description: Handle rest api
     events:
-      - httpApi: "*"
+      - httpApi:
+          path: "*"
+          authorizer:
+            name: serviceAuthorizer
 
 # you can add CloudFormation resource templates here
 resources:
   Resources:
-    UsersTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        StreamSpecification:
-          StreamViewType: NEW_AND_OLD_IMAGES
-        TableName: ${env:APP_DYNAMODB_USER_TABLE}
     # Cognito
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
@@ -116,5 +202,64 @@ resources:
           Ref: CognitoUserPool
         GenerateSecret: false
         ExplicitAuthFlows:
-          - "ALLOW_USER_SRP_AUTH"
-          - "ALLOW_REFRESH_TOKEN_AUTH"
+          - ALLOW_USER_SRP_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
+          - ALLOW_ADMIN_USER_PASSWORD_AUTH
+        SupportedIdentityProviders:
+          - COGNITO
+    # Bucket
+    BucketUpload:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${env:APP_AWS_BUCKET_S3_UPLOAD}-${env:APP_AWS_REGION}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          IgnorePublicAcls: true
+          BlockPublicPolicy: true
+          RestrictPublicBuckets: true
+    BucketResize:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${env:APP_AWS_BUCKET_S3_UPLOAD_RESIZE}-${env:APP_AWS_REGION}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          IgnorePublicAcls: true
+          BlockPublicPolicy: true
+          RestrictPublicBuckets: true
+    # Dynamo
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        TableName: ${env:APP_DYNAMODB_USER_TABLE}
+    TodosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        TableName: ${env:APP_DYNAMODB_TODO_TABLE}
+
+  Outputs:
+    UserPoolId:
+      Value:
+        Ref: CognitoUserPool
+    UserPoolClientId:
+      Value:
+        Ref: CognitoUserPoolClient

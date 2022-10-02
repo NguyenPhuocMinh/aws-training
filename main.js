@@ -1,13 +1,29 @@
 'use strict';
 
-const slsHttp = require('serverless-http');
-const server = require('./src/server');
+import server from './src/server';
+import {
+  loginUser,
+  registerUser,
+  uploadImage,
+  getImage,
+  deleteImage,
+  resizeImage,
+  createTodo,
+  getTodos,
+  getTodo,
+  updateTodo,
+  deleteTodo
+} from './handlers';
 
-const handler = slsHttp(server);
-
-module.exports.restApi = handler;
-
-const { loginUser, registerUser } = require('./handlers');
-
-module.exports.loginUser = loginUser;
-module.exports.registerUser = registerUser;
+exports.registerUser = registerUser;
+exports.loginUser = loginUser;
+exports.uploadImage = uploadImage;
+exports.getImage = getImage;
+exports.deleteImage = deleteImage;
+exports.resizeImage = resizeImage;
+exports.createTodo = createTodo;
+exports.getTodos = getTodos;
+exports.getTodo = getTodo;
+exports.updateTodo = updateTodo;
+exports.deleteTodo = deleteTodo;
+exports.server = server;

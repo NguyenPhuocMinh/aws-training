@@ -13,3 +13,12 @@ package-lock.json
 
 # text
 tree.text
+
+# build
+dist
+
+# webpack
+.webpack
+
+# img folders
+images

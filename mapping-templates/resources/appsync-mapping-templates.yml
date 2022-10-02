@@ -1,0 +1,29 @@
+- dataSource: createTodo
+  type: Mutation
+  field: createTodo
+  request: request/mutation/create-todo.request.vtl
+  response: response/common.response.vtl
+
+- dataSource: getTodos
+  type: Query
+  field: getTodos
+  request: false
+  response: response/common.response.vtl
+
+- dataSource: getTodo
+  type: Query
+  field: getTodo
+  request: request/query/get-todo.request.vtl
+  response: response/common.response.vtl
+
+- dataSource: updateTodo
+  type: Mutation
+  field: updateTodo
+  request: request/mutation/update-todo.request.vtl
+  response: response/common.response.vtl
+
+- dataSource: deleteTodo
+  type: Mutation
+  field: deleteTodo
+  request: request/mutation/delete-todo.request.vtl
+  response: response/common.response.vtl

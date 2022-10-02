@@ -1,11 +1,13 @@
-"use strict";
+'use strict';
 
-const homeRouter = require("express").Router();
+import { Router } from 'express';
 
-homeRouter.get("/", (req, res) => {
+const homeRouter = Router();
+
+homeRouter.get('/', (req, res) => {
   res.send({
-    message: "Hello Aws Lambda Function",
+    message: 'Hello Aws Lambda Function'
   });
 });
 
-module.exports = homeRouter;
+export default homeRouter;

@@ -1,20 +1,20 @@
-"use strict";
+'use strict';
 
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const morgan = require("morgan");
+import slsHttp from 'serverless-http';
+import express from 'express';
+import { json, urlencoded } from 'body-parser';
+import cors from 'cors';
+import morgan from 'morgan';
 
-const routers = require("./routers");
+import configs from '../configs';
+import routers from './routers';
 
 const server = express();
 
 server.use(cors());
-server.use(morgan("combined"));
-server.use(bodyParser.json({ limit: "50mb" }));
-// parse application/x-www-form-urlencoded
-server.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-server.use(express.static(__dirname + "/public"));
+server.use(morgan('combined'));
+server.use(json({ limit: '50mb' }));
+server.use(urlencoded({ limit: '50mb', extended: true }));
 
 /**
  * Routers
@@ -26,18 +26,20 @@ server.use(routers);
  */
 server.use((req, res, next) => {
   return res.status(404).send({
-    error: "Not Found Router",
+    error: 'Not Found Router'
   });
 });
 
-const configs = require("../configs");
 const APP_PORT = configs.port;
 
 /**
  * Listening
  */
-server.listen(APP_PORT, () => {
+server.listen(APP_PORT, (err) => {
+  if (err) {
+    console.log('Error', err);
+  }
   console.log(`App running on port ${APP_PORT}`);
 });
 
-module.exports = server;
+export default slsHttp(server);

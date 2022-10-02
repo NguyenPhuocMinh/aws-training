@@ -1,0 +1,32 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  getTodos: [ToDo!]!
+  getTodo(id: ID!): AWSJSON
+}
+
+type Mutation {
+  createTodo(data: CreateTodo!): AWSJSON
+  updateTodo(data: UpdateTodo!): AWSJSON
+  deleteTodo(id: ID!): AWSJSON
+}
+
+input CreateTodo {
+  title: String!
+  description: String!
+}
+
+input UpdateTodo {
+  id: ID!
+  title: String
+  description: String
+}
+
+type ToDo {
+  id: ID!
+  name: String
+  description: String
+}

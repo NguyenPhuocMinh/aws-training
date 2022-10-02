@@ -4,23 +4,31 @@
   "description": "Demo Aws lambda function",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
-    "dev": "sls deploy --stage dev",
-    "deploy:prod": "sls deploy --stage production",
-    "remove:dev": "sls remove --stage dev"
+    "start": "npm run compiler && node dist/main.js",
+    "compiler": "rimraf ./dist && babel . --ignore node_modules --out-dir dist",
+    "deploy:dev": "sls deploy --stage dev --verbose",
+    "deploy:prod": "npm run lint:check && sls deploy --stage production --verbose",
+    "deploy:func": "sls deploy --stage dev --verbose -f",
+    "remove:dev": "sls remove --stage dev --region",
+    "deploy:local": "sls offline start",
+    "lint:check": "eslint --color --ext .js,.ts,.tsx \"./src/**/*.{js,ts,tsx}\" \"./handlers/**/*.{js,ts,tsx}\""
   },
   "keywords": [
-    "serverless",
+    "serverless-framework",
     "aws-lambda",
     "aws-cognito",
     "aws-s3",
-    "aws-dynamoDB"
+    "aws-dynamoDB",
+    "aws-appsync",
+    "graphql",
+    "express"
   ],
   "author": "Minh Nguyen",
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.178.0",
     "aws-sdk": "^2.1216.0",
+    "axios": "^0.27.2",
     "bcryptjs": "^2.4.3",
     "bluebird": "^3.7.2",
     "body-parser": "^1.20.0",
@@ -29,22 +37,36 @@
     "dotenv-expand": "^9.0.0",
     "dynamoose": "^3.1.0",
     "express": "^4.18.1",
+    "file-type": "^18.0.0",
     "jimp": "^0.16.2",
     "lodash": "^4.17.21",
+    "moment": "^2.29.4",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "multer-s3": "^3.0.1",
+    "serverless-appsync-plugin": "^1.14.0",
     "serverless-http": "^3.0.2",
     "sharp": "^0.31.0",
+    "source-map-support": "^0.5.21",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.18.10",
+    "@babel/core": "^7.19.1",
+    "@babel/node": "^7.19.1",
+    "@babel/preset-env": "^7.19.1",
+    "babel-loader": "^8.2.5",
+    "babel-plugin-source-map-support": "^2.2.0",
     "eslint": "^8.23.1",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.3.0",
     "eslint-plugin-promise": "^6.0.1",
+    "rimraf": "^3.0.2",
     "serverless-dotenv-plugin": "^4.0.2",
-    "serverless-offline": "^10.0.2"
+    "serverless-offline": "^10.0.2",
+    "serverless-webpack": "^5.9.1",
+    "webpack": "^5.74.0",
+    "webpack-node-externals": "^3.0.0"
   }
 }

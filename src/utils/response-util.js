@@ -1,9 +1,9 @@
 'use strict';
 
-const handleResponse = (status, data) => {
+const handleResponse = (status, context) => {
   return {
     statusCode: status,
-    body: JSON.stringify(data),
+    body: JSON.stringify(context),
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
@@ -12,4 +12,4 @@ const handleResponse = (status, data) => {
   };
 };
 
-module.exports = handleResponse;
+export default handleResponse;

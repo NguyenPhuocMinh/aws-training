@@ -1,14 +1,27 @@
 'use strict';
 
-const { isEmpty } = require('lodash');
+import { isEmpty } from 'lodash';
 
-const handleValidate = (data) => {
-  const { email, password } = data;
+export const handleValidate = (data) => {
+  let isValid = true;
+
+  const { email, password } = JSON.parse(data);
 
   if (isEmpty(email) || isEmpty(password) || password.length < 6) {
-    return false;
+    isValid = false;
   }
-  return true;
+
+  return isValid;
 };
 
-module.exports = handleValidate;
+export const handleValidateUploadImage = (data) => {
+  let isValid = true;
+
+  const { image } = JSON.parse(data);
+
+  if (isEmpty(image)) {
+    isValid = false;
+  }
+
+  return isValid;
+};

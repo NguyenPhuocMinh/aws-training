@@ -1,14 +1,13 @@
-"use strict";
+'use strict';
 
-const multer = require("multer");
-const multerS3 = require("multer-s3");
-const { s3Services } = require("../aws");
-const configs = require("../../../configs");
+import multer, { diskStorage } from 'multer';
+import multerS3 from 'multer-s3';
+import configs from '../../configs';
 
 const storageLocal = multer({
-  storage: multer.diskStorage({
+  storage: diskStorage({
     destination: function (req, file, cb) {
-      cb(null, `https://s3.amazonaws.com/${configs.bucketImage}/`);
+      cb(null, `https://s3.amazonaws.com/${configs.awsBucketImage}/`);
     },
     filename: function (req, file, cb) {
       const { fieldname: fieldName, originalname: originalName } = file;
@@ -16,18 +15,18 @@ const storageLocal = multer({
       cb(
         null,
         fieldName +
-          "-" +
+          '-' +
           dateTimestamp +
-          "." +
-          originalName.split(".")[originalName.split(".").length - 1]
+          '.' +
+          originalName.split('.')[originalName.split('.').length - 1]
       );
-    },
-  }),
+    }
+  })
 });
 
 // const storageS3 = multerS3({
 //   s3: s3Services.s3,
-//   bucket: configs.bucketImage,
+//   bucket: configs.awsBucketImage,
 //   key: function (req, file, cb) {
 //     const { fieldname: fieldName, originalname: originalName } = file;
 //     const dateTimestamp = Date.now();
@@ -43,12 +42,12 @@ const storageLocal = multer({
 // });
 
 const uploadSingleLocal = multer({
-  storage: storageLocal,
-}).single("file");
+  storage: storageLocal
+}).single('file');
 
 const uploadMultiLocal = multer({
-  storage: storageLocal,
-}).array("file", 12);
+  storage: storageLocal
+}).array('file', 12);
 
 // const uploadSingleS3 = multer({
 //   storage: storageS3,
@@ -60,9 +59,9 @@ const uploadMultiLocal = multer({
 
 const multerServices = {
   uploadSingleLocal,
-  uploadMultiLocal,
+  uploadMultiLocal
   // uploadSingleS3,
   // uploadMultiS3,
 };
 
-module.exports = multerServices;
+export default multerServices;

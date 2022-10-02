@@ -1,66 +1,64 @@
 'use strict';
 
-const { isEmpty } = require('lodash');
-const { aws } = require('../../src/services');
-const configs = require('../../configs');
+import { isEmpty } from 'lodash';
+import { awsCognito } from '../../common';
+import configs from '../../configs';
+import { handleResponse, handleValidate } from '../../src/utils';
 
-const { handleResponse, handleValidate } = require('../../src/utils');
+const registerUser = async (event) => {
+  try {
+    const isValid = handleValidate(event.body);
 
-module.exports = async (event, context, callback) => {
-  console.log(
-    '🚀 ~ file: registerUser.js ~ line 8 ~ module.exports= ~ context',
-    context
-  );
-  console.log(
-    '🚀 ~ file: registerUser.js ~ line 8 ~ module.exports= ~ event',
-    event
-  );
-  const { email, password } = JSON.parse(event.body);
+    if (!isValid) {
+      return handleResponse(400, { msg: 'Input in valid' });
+    }
 
-  const isValid = handleValidate({ email, password });
+    const { email, password } = JSON.parse(event.body);
 
-  if (!isValid) {
-    const error = handleResponse(400, { msg: 'Input in valid' });
-    callback(null, error);
-  }
-
-  const paramsRegister = {
-    UserPoolId: configs.userPoolID /* required */,
-    Username: email /* required */,
-    MessageAction: 'SUPPRESS',
-    UserAttributes: [
-      {
-        Name: 'email',
-        Value: email
-      },
-      {
-        Name: 'email_verified',
-        Value: 'true'
-      }
-    ],
-    ValidationData: [
-      {
-        Name: 'email' /* required */,
-        Value: email
-      }
-    ]
-  };
-
-  const userRegister = await aws.cognitoServices.AdminCreateUser(
-    paramsRegister
-  );
-
-  if (!isEmpty(userRegister.User)) {
-    const paramsSetPassword = {
-      UserPoolId: configs.userPoolID,
-      Username: email,
-      Password: password,
-      Permanent: true
+    const paramsRegister = {
+      UserPoolId: configs.userPoolID /* required */,
+      Username: email /* required */,
+      MessageAction: 'SUPPRESS',
+      UserAttributes: [
+        {
+          Name: 'email',
+          Value: email
+        },
+        {
+          Name: 'email_verified',
+          Value: 'true'
+        }
+      ],
+      ValidationData: [
+        {
+          Name: 'email' /* required */,
+          Value: email
+        }
+      ]
     };
-    await aws.cognitoServices.SetUserPassword(paramsSetPassword);
+
+    const userRegister = await awsCognito.RegisterAdminUser(
+      paramsRegister
+    );
+
+    if (!isEmpty(userRegister.User)) {
+      const paramsSetPassword = {
+        UserPoolId: configs.userPoolID,
+        Username: email,
+        Password: password,
+        Permanent: true
+      };
+      await awsCognito.SetUserPassword(paramsSetPassword);
+    }
+
+    return handleResponse(200, {
+      msg: 'Register User Success',
+      data: JSON.parse(event.body)
+    });
+  } catch (error) {
+    const errorMsg = error.message ?? 'Internal server error';
+    return handleResponse(500, { errorMsg });
   }
-
-  const response = handleResponse(200, { msg: 'Register User Success' });
-
-  callback(null, response);
 };
+
+export default registerUser;

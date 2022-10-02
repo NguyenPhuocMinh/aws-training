@@ -1,7 +1,6 @@
-"use strict";
+'use strict';
 
-const homeRouter = require("./home-router");
-const userRouter = require("./user-router");
-const uploadRouter = require("./upload-router");
+import homeRouter from './home-router';
+import userRouter from './user-router';
 
-module.exports = [homeRouter, userRouter, uploadRouter];
+export default [homeRouter, userRouter];

@@ -1,13 +1,9 @@
 'use strict';
 
-const handleError = require('./error-util');
-const handleSuccess = require('./success-util');
-const handleResponse = require('./response-util');
-const handleValidate = require('./validate-util');
+import handleError from './error-util';
+import handleSuccess from './success-util';
+import handleResponse from './response-util';
 
-module.exports = {
-  handleError,
-  handleSuccess,
-  handleResponse,
-  handleValidate
-};
+export * from './validate-util';
+
+export { handleError, handleSuccess, handleResponse };

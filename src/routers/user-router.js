@@ -1,24 +1,26 @@
-"use strict";
+'use strict';
 
-const express = require("express");
-const uuidV4 = require("uuid").v4;
-const { aws } = require("../services");
-const { handleError, handleSuccess } = require("../utils");
-const configs = require("../../configs");
+import { Router } from 'express';
+import { v4 as uuidV4 } from 'uuid';
+import { awsDynamoDB } from '../../common';
+import { handleError, handleSuccess } from '../utils';
+import configs from '../../configs';
+import { isEmpty } from 'lodash';
 
-const userRouter = express.Router();
+const userRouter = Router();
 
 /**
  * @description Get All Data User From DynamoDB Aws
  */
-userRouter.get("/users", async (req, res) => {
+userRouter.get('/users', async (req, res) => {
   try {
     const params = {
       TableName: configs.tables.user,
-      ProjectionExpression: "id, userName, email",
+      ProjectionExpression: 'id, userName, email'
     };
 
-    const data = await aws.dynamoDBServices.ScanData(params);
+    const data = await awsDynamoDB.ScanData(params);
+
     handleSuccess(res, data);
   } catch (err) {
     handleError(res, err);
@@ -28,7 +30,7 @@ userRouter.get("/users", async (req, res) => {
 /**
  * @description Create User From DynamoDB Aws
  */
-userRouter.post("/users", async (req, res) => {
+userRouter.post('/users', async (req, res) => {
   try {
     const { userName, email } = req.body;
     const params = {
@@ -36,11 +38,11 @@ userRouter.post("/users", async (req, res) => {
       Item: {
         id: uuidV4(),
         userName,
-        email,
-      },
+        email
+      }
     };
 
-    const data = await aws.dynamoDBServices.CreateData(params);
+    const data = await awsDynamoDB.CreateData(params);
     handleSuccess(res, data);
   } catch (err) {
     handleError(res, err);
@@ -50,16 +52,51 @@ userRouter.post("/users", async (req, res) => {
 /**
  * @description Get Data User By Condition From DynamoDB Aws
  */
-userRouter.get("/users/:id", async (req, res) => {
+userRouter.get('/users/:id', async (req, res) => {
   try {
     const params = {
       TableName: configs.tables.user,
       Key: {
-        id: req.params.id,
-      },
+        id: req.params.id
+      }
     };
 
-    const data = await aws.dynamoDBServices.GetData(params);
+    const data = await awsDynamoDB.GetData(params);
+    handleSuccess(res, data);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+userRouter.put('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (isEmpty(id)) {
+      handleError(res, { statusCode: 400, message: 'Not found ID' });
+    }
+
+    const { userName, email } = req.body;
+
+    const params = {
+      TableName: configs.tables.user,
+      Key: {
+        id: req.params.id
+      },
+      ExpressionAttributeNames: {
+        '#u': 'userName',
+        '#e': 'email'
+      },
+      ExpressionAttributeValues: {
+        ':u': userName,
+        ':e': email
+      },
+      UpdateExpression: 'SET #u = :u, #e = :e',
+      ReturnValues: 'ALL_NEW'
+    };
+
+    const data = await awsDynamoDB.UpdateData(params);
+
     handleSuccess(res, data);
   } catch (err) {
     handleError(res, err);
@@ -69,20 +106,20 @@ userRouter.get("/users/:id", async (req, res) => {
 /**
  * @description Delete User From DynamoDB Aws
  */
-userRouter.delete("/users/:id", async (req, res) => {
+userRouter.delete('/users/:id', async (req, res) => {
   const params = {
     TableName: configs.tables.user,
     Key: {
-      id: req.params.id,
-    },
+      id: req.params.id
+    }
   };
 
   try {
-    const data = await aws.dynamoDBServices.DeleteData(params);
+    const data = await awsDynamoDB.DeleteData(params);
     handleSuccess(res, data);
   } catch (err) {
     handleError(res, err);
   }
 });
 
-module.exports = userRouter;
+export default userRouter;
