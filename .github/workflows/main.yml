@@ -20,14 +20,20 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
         # install serverless
-      - name: Install Serverless Framework
+      - name: Install serverless framework
         run: npm install -g serverless
+        # setup aws credentials
+      - name: Serverless AWS credentials
+        run: sls config credentials --provider aws --key ${{ secrets.AWS_KEY }} --secret ${{ secrets.AWS_SECRET }}
         # install node modules
-      - name: Install NPM Dependencies
+      - name: Install npm dependencies
         run: npm install
+        # create ENV
+      - name: Create env file
+        run: |
+          cat > .env << EOF
+          ${{ secrets.ENV }}
+          EOF
         # deploy serverless
-      - name: serverless deploy
+      - name: Deploy dev
         run: npm run deploy:dev
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
