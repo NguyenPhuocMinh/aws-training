@@ -19,6 +19,13 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+        # install serverless
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+        # install node modules
+      - name: Install NPM Dependencies
+        run: npm install
+        # deploy serverless
       - name: serverless deploy
         run: npm run deploy:dev
         env:
