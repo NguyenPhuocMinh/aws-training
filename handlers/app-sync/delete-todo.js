@@ -18,7 +18,7 @@ const deleteTodo = async (event) => {
     return handleResponse(200, { msg: 'Delete success' });
   } catch (error) {
     const errorMsg = error.message ?? 'Internal server error';
-    return handleResponse(500, { errorMsg });
+    return handleResponse(500, { errorMsg, stack: err.stack });
   }
 };
 

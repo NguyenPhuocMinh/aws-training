@@ -6,6 +6,7 @@ import {
   registerUser,
   uploadImage,
   getImage,
+  getImageResize,
   deleteImage,
   resizeImage,
   createTodo,
@@ -19,6 +20,7 @@ exports.registerUser = registerUser;
 exports.loginUser = loginUser;
 exports.uploadImage = uploadImage;
 exports.getImage = getImage;
+exports.getImageResize = getImageResize;
 exports.deleteImage = deleteImage;
 exports.resizeImage = resizeImage;
 exports.createTodo = createTodo;

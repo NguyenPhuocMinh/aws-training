@@ -74,6 +74,7 @@ $ npm init -y
 
 ### **Setup Environment**
 
+- create account aws
 - npm i -g serverless
 - serverless create --template aws-nodejs --path folder-name
 - serverless config credentials \
@@ -137,7 +138,17 @@ $ npm init -y
 
 ### **2. Lambda Function**
 
-- docs:
+- docs: https://docs.aws.amazon.com/lambda/latest/dg/welcome.html
+
+  - Lambda is a compute service that lets you run code without provisioning or managing servers
+  - Lambda runs your code on a high-availability compute infrastructure and performs all of the administration of the compute resources, including server and operating system maintenance, capacity provisioning and automatic scaling, and logging
+    
+  **Invoke your Lambda functions**
+    - Build data-processing triggers for AWS services such as Amazon Simple Storage Service (Amazon S3) and Amazon DynamoDB.
+
+    - Process streaming data stored in Amazon Kinesis.
+
+    - Create your own backend that operates at AWS scale, performance, and security.
 
 ### **3. Cognito**
 
@@ -149,7 +160,7 @@ $ npm init -y
 
 ### **4. DynamoDB**
 
-- docs: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html
+- docs sdk: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html
 
 ### **5. S3**
 

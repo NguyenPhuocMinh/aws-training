@@ -9,7 +9,7 @@
     "deploy:dev": "sls deploy --stage dev --verbose",
     "deploy:prod": "npm run lint:check && sls deploy --stage production --verbose",
     "deploy:func": "sls deploy --stage dev --verbose -f",
-    "remove:dev": "sls remove --stage dev --region",
+    "deploy:clean": "sls remove --stage dev --region",
     "deploy:local": "sls offline start",
     "lint:check": "eslint --color --ext .js,.ts,.tsx \"./src/**/*.{js,ts,tsx}\" \"./handlers/**/*.{js,ts,tsx}\""
   },
@@ -27,6 +27,9 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.178.0",
+    "@sentry/node": "^7.14.1",
+    "@sentry/serverless": "^7.14.1",
+    "@sentry/tracing": "^7.14.1",
     "aws-sdk": "^2.1216.0",
     "axios": "^0.27.2",
     "bcryptjs": "^2.4.3",
@@ -46,7 +49,6 @@
     "multer-s3": "^3.0.1",
     "serverless-appsync-plugin": "^1.14.0",
     "serverless-http": "^3.0.2",
-    "sharp": "^0.31.0",
     "source-map-support": "^0.5.21",
     "uuid": "^9.0.0"
   },

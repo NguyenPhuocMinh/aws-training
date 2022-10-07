@@ -3,4 +3,10 @@ export * as awsS3 from './services/aws-s3';
 export * as awsDynamoDB from './services/aws-dynamodb';
 
 export * as dynamoose from './services/dynamoose';
-export * as multer from './services/multer';
+
+export * as sentryNode from './sentry/sentry-node';
+
+import sentryNode from './sentry/sentry-node';
+import sentryServerless from './sentry/sentry-serverless';
+
+export { sentryServerless, sentryNode };

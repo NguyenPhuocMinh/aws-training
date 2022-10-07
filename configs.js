@@ -1,6 +1,6 @@
 'use strict';
 
-require("dotenv").config();
+require('dotenv').config();
 
 const configs = {
   port: process.env.APP_PORT || 8080,
@@ -17,6 +17,9 @@ const configs = {
     user: process.env.APP_DYNAMODB_USER_TABLE,
     todo: process.env.APP_DYNAMODB_TODO_TABLE
   },
+  sentry: {
+    dsn: process.env.APP_DSN_SENTRY_DSN
+  }
 };
 
 export default configs;

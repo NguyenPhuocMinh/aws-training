@@ -1,6 +1,5 @@
 'use strict';
 
-import axios from 'axios';
 import { awsS3 } from '../../common';
 import { handleResponse, handleValidateUploadImage } from '../../src/utils';
 import configs from '../../configs';
@@ -24,7 +23,7 @@ const uploadImage = async (event) => {
 
     const params = {
       Bucket: `${configs.awsBucketUpload}-${configs.awsRegion}`,
-      Key: key,
+      Key: `uploads/${key}`,
       Body: base64Data,
       ContentEncoding: 'base64',
       ContentType: 'image/jpeg',

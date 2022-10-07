@@ -11,6 +11,7 @@ import registerUser from './auth/registerUser';
  */
 import uploadImage from './upload/uploadImage';
 import getImage from './upload/getImage';
+import getImageResize from './upload/getImageResize';
 import deleteImage from './upload/deleteImage';
 import resizeImage from './upload/resizeImage';
 
@@ -28,6 +29,7 @@ export {
   registerUser,
   uploadImage,
   getImage,
+  getImageResize,
   deleteImage,
   resizeImage,
   createTodo,

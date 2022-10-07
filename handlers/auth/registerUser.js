@@ -1,16 +1,16 @@
 'use strict';
 
 import { isEmpty } from 'lodash';
-import { awsCognito } from '../../common';
+import { awsCognito, sentryServerless } from '../../common';
 import configs from '../../configs';
 import { handleResponse, handleValidate } from '../../src/utils';
 
-const registerUser = async (event) => {
+const registerUser = sentryServerless.AWSLambda.wrapHandler(async (event) => {
   try {
     const isValid = handleValidate(event.body);
 
     if (!isValid) {
-      return handleResponse(400, { msg: 'Input in valid' });
+      return handleResponse(400, { errorMsg: 'Input in valid' });
     }
 
     const { email, password } = JSON.parse(event.body);
@@ -37,9 +37,7 @@ const registerUser = async (event) => {
       ]
     };
 
-    const userRegister = await awsCognito.RegisterAdminUser(
-      paramsRegister
-    );
+    const userRegister = await awsCognito.RegisterAdminUser(paramsRegister);
 
     if (!isEmpty(userRegister.User)) {
       const paramsSetPassword = {
@@ -55,10 +53,10 @@ const registerUser = async (event) => {
       msg: 'Register User Success',
       data: JSON.parse(event.body)
     });
-  } catch (error) {
-    const errorMsg = error.message ?? 'Internal server error';
-    return handleResponse(500, { errorMsg });
+  } catch (err) {
+    const errorMsg = err.message ?? 'Internal server error';
+    return handleResponse(500, { errorMsg, stack: err.stack });
   }
-};
+});
 
 export default registerUser;

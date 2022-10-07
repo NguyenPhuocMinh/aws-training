@@ -30,7 +30,7 @@ const updateTodo = async (event) => {
     return handleResponse(200, { msg: 'Update success', data });
   } catch (error) {
     const errorMsg = error.message ?? 'Internal server error';
-    return handleResponse(500, { errorMsg });
+    return handleResponse(500, { errorMsg, stack: err.stack });
   }
 };
 
