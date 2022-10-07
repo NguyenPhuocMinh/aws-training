@@ -95,11 +95,8 @@ $ npm init -y
 - APP_AWS_ACCESS_KEY=**\*\***
 - APP_AWS_SECRET_KEY=**\*\***
 - APP_AWS_BUCKET_S3_UPLOAD=**\*\***
-- APP_AWS_BUCKET_S3_UPLOAD_RESIZE=**\*\***
 - APP_AWS_USER_POOL_NAME=**\*\***
 - APP_AWS_USER_POOL_CLIENT_NAME=**\*\***
-- APP_AWS_USER_POOL_ID=**\*\***
-- APP_AWS_CLIENT_ID=**\*\***
 - APP_DYNAMODB_USER_TABLE=**\*\***
 - APP_DYNAMODB_TODO_TABLE=**\*\***
 
