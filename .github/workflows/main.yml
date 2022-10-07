@@ -23,7 +23,7 @@ jobs:
       - name: Install serverless framework
         run: npm install -g serverless
         # setup aws credentials
-      - name: Serverless AWS credentials
+      - name: Serverless aws config credentials
         run: sls config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         # install node modules
       - name: Install npm dependencies

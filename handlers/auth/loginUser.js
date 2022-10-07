@@ -10,6 +10,7 @@ const loginUser = sentryServerless.AWSLambda.wrapHandler(
       const isValid = handleValidate(event.body);
 
       if (!isValid) {
+        sentryServerless.captureMessage('Input in valid');
         return handleResponse(400, { errorMsg: 'Input in valid' });
       }
 

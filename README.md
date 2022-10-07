@@ -13,12 +13,14 @@ $ npm init -y
 ├── README.md
 ├── common
 │   ├── index.js
+│   ├── sentry
+│   │   ├── sentry-node.js
+│   │   └── sentry-serverless.js
 │   └── services
 │       ├── aws-cognito.js
 │       ├── aws-dynamodb.js
 │       ├── aws-s3.js
-│       ├── dynamoose.js
-│       └── multer.js
+│       └── dynamoose.js
 ├── configs.js
 ├── dist
 ├── graphql
@@ -37,6 +39,7 @@ $ npm init -y
 │   └── upload
 │       ├── deleteImage.js
 │       ├── getImage.js
+│       ├── getImageResize.js
 │       ├── resizeImage.js
 │       └── uploadImage.js
 ├── images
@@ -190,6 +193,9 @@ $ npm init -y
 
   - https://docs.aws.amazon.com/appsync/latest/devguide/scalars.html
 
+### **7. Sentry**
+
+- Monitoring Log
 ### **Curl**
 
 - **/auth/register**
